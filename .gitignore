@@ -1,0 +1,28 @@
+# Python virtual environments
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Environment variables and secrets
+.env
+.env.*
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Raw datasets
+data/raw/
+
+# Temporary files
+*.log
