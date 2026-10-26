@@ -26,3 +26,6 @@ data/raw/
 
 # Temporary files
 *.log
+
+# test jupyter notebook
+sandbox_temp.ipynb
