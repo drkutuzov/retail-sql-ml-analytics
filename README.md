@@ -311,3 +311,78 @@ The database ingestion pipeline is implemented and tested. SQL analytics and pre
 The Online Retail dataset is provided by the UCI Machine Learning Repository.
 
 [UCI Online Retail Dataset](https://archive.ics.uci.edu/dataset/352/online+retail)
+
+## Daily Sales Forecasting
+
+The project includes a machine learning workflow for predicting daily gross retail sales using Python, Pandas, and scikit-learn.
+
+### Data Preparation
+
+Daily gross sales are calculated from the SQLite database using the following filters:
+
+- Positive quantities (`quantity > 0`)
+- Positive unit prices (`unit_price > 0`)
+- Exclusion of cancelled invoices (`invoice_no NOT LIKE 'C%'`)
+
+The forecasting dataset covers January–November 2011, excluding days without recorded sales.
+
+Three features are used:
+
+- **Previous sales (`lag_1`):** Revenue from the previous recorded-sales day.
+- **Weekday:** Day of the week, encoded numerically.
+- **Month:** Calendar month.
+
+After constructing the lag feature, the dataset contains 276 observations.
+
+### Model Training and Evaluation
+
+The observations are divided chronologically into:
+
+- Training: 220 observations (January 5 – September 26, 2011)
+- Testing: 56 observations (September 27 – November 30, 2011)
+
+A Linear Regression model is evaluated against a baseline that predicts the previous recorded-sales day's revenue.
+
+| Model | MAE (£) | RMSE (£) |
+|---|---:|---:|
+| Previous-day baseline | 18,959.31 | 24,900.16 |
+| Linear Regression | 15,581.71 | 19,790.51 |
+
+Linear Regression reduces the mean absolute error by **17.8%** compared with the baseline.
+
+### Time-Series Cross-Validation
+
+Five-fold expanding-window cross-validation is performed on the training data to compare two weekday representations.
+
+| Model | Mean validation MAE (£) |
+|---|---:|
+| Linear Regression (numerical weekday) | 10,554.73 |
+| Linear Regression (one-hot weekday) | 11,152.37 |
+
+The numerical-weekday model achieves the lower mean validation error and is retained as the preferred model.
+
+### Forecast Visualization
+
+![Actual versus predicted daily retail sales](results/figures/daily_sales_forecast.png)
+
+The model captures broad patterns in daily revenue but tends to underestimate unusually high sales and overestimate some low-revenue days.
+
+### Limitations
+
+This is a **one-step-ahead forecasting approach**, using the actual revenue from the previous recorded-sales day. It does not forecast an entire future period without observing intervening sales.
+
+Days without recorded sales are excluded, so the lag feature represents the previous recorded-sales day rather than necessarily the previous calendar day.
+
+The final test period was also examined during model development. Consequently, the reported test metrics should be interpreted as an exploratory holdout evaluation rather than performance on a completely untouched independent test set.
+
+The dataset covers a limited historical period, and forecasting performance may differ on other periods or datasets.
+
+### Reproduce the Analysis
+
+From the project root, after installing the dependencies and generating `retail_real.db`, run:
+
+```bash
+python src/analyze_daily_sales.py
+```
+
+The script prints model evaluation metrics and saves the prediction figure to `results/figures/daily_sales_forecast.png`.
